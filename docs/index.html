@@ -3,231 +3,47 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>LFCstats — League Snapshot</title>
+  <title>PL MD20 snapshot</title>
 
-  <!-- Tabulator -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/tabulator-tables@5.6.4/dist/css/tabulator.min.css"
-  />
+  <!-- Tabulator (keep as-is: your working 6.3.1 unpkg URLs) -->
+  <link href="https://unpkg.com/tabulator-tables@6.3.1/dist/css/tabulator_site_dark.min.css" rel="stylesheet">
 
-  <style>
-    :root{
-      --bg:#0f1115;
-      --panel:#151923;
-      --text:#e9ecf1;
-      --muted:#a7afbd;
-      --border:#2a3140;
-    }
-    body{
-      margin:0;
-      padding:24px;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-    }
-    header{
-      max-width: 1100px;
-      margin: 0 auto 16px auto;
-    }
-    h1{
-      margin:0 0 6px 0;
-      font-size: 22px;
-      letter-spacing: .2px;
-    }
-    p{
-      margin:0;
-      color: var(--muted);
-      line-height: 1.35;
-      font-size: 13px;
-    }
-    .wrap{
-      max-width: 1100px;
-      margin: 18px auto 0 auto;
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px;
-    }
-    .row{
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:space-between;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-    .hint{
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .pill{
-      border:1px solid var(--border);
-      padding:6px 10px;
-      border-radius: 999px;
-      font-size: 12px;
-      color: var(--muted);
-      background: #101521;
-    }
-    #table{
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .tabulator{
-      background: transparent;
-      border: none;
-    }
-    .tabulator .tabulator-header{
-      background: #101521;
-      border-bottom: 1px solid var(--border);
-      color: var(--text);
-    }
-    .tabulator-row{
-      background: transparent;
-      color: var(--text);
-      border-bottom: 1px solid rgba(42,49,64,.6);
-    }
-    .tabulator-row.tabulator-row-even{
-      background: rgba(255,255,255,0.02);
-    }
-    .tabulator-cell{
-      border-right: 1px solid rgba(42,49,64,.35);
-    }
-  </style>
+  <!-- Your site styles -->
+  <link href="./style.css" rel="stylesheet">
 </head>
 
 <body>
-  <header>
+  <header class="site-header">
     <h1>LFCstats — League Snapshot</h1>
-    <p>
-      Simple sortable table (no charts yet). Data loaded from <span class="pill">/data/latest.csv</span>.
+    <!--p>
+      Simple sortable table (no charts yet). Data loaded from
+      <span class="pill">../data/latest.csv</span>.
       <br/>Tip: click column headers to sort; use the search box to filter teams.
-    </p>
+    </p-->
   </header>
 
-  <div class="wrap">
+  <main class="wrap">
     <div class="row">
       <div class="hint">Search Team:</div>
-      <input id="teamFilter" type="text" placeholder="e.g. Liverpool, Arsenal..."
-        style="flex:1; min-width:220px; max-width:420px; padding:10px 12px; border-radius:10px; border:1px solid var(--border); background:#0f1420; color:var(--text);" />
+      <input id="teamFilter" type="text" placeholder="e.g. Liverpool, Arsenal..." />
       <div class="pill" id="status">Loading…</div>
+
+      <label class="toggle">
+        <input id="deltaToggle" type="checkbox" />
+        <span>Show Delta vs League Average</span>
+      </label>
     </div>
 
     <div id="table"></div>
-  </div>
+  </main>
 
-  <script src="https://unpkg.com/tabulator-tables@5.6.4/dist/js/tabulator.min.js"></script>
-  <script>
-    // IMPORTANT: put your CSV here
-    const CSV_URL = "/data/latest.csv";
+  <!-- Tabulator JS (keep as-is: your working 6.3.1 unpkg URL) -->
+  <script src="https://unpkg.com/tabulator-tables@6.3.1/dist/js/tabulator.min.js"></script>
 
-    // Helpers
-    const num = (v) => {
-      const n = Number(String(v).replace("%",""));
-      return Number.isFinite(n) ? n : null;
-    };
+  <!-- CSV parser -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
-    // Build table
-    const table = new Tabulator("#table", {
-      height: "75vh",
-      layout: "fitColumns",
-      responsiveLayout: "collapse",
-      ajaxURL: CSV_URL,
-      ajaxContentType: "csv",
-      ajaxConfig: "GET",
-      placeholder: "No data loaded.",
-      initialSort: [{ column: "team", dir: "asc" }],
-
-      columns: [
-        { title: "Team", field: "team", headerSort: true, widthGrow: 2 },
-
-        { title: "P", field: "played", sorter: "number", hozAlign: "right", width: 70 },
-
-        { title: "G", field: "goals", sorter: "number", hozAlign: "right", width: 70 },
-
-        {
-          title: "xG",
-          field: "xg",
-          sorter: "number",
-          hozAlign: "right",
-          formatter: (cell) => {
-            const v = num(cell.getValue());
-            return v === null ? "" : v.toFixed(2);
-          }
-        },
-
-        {
-          title: "G − xG",
-          field: "goals_vs_xg",
-          sorter: "number",
-          hozAlign: "right",
-          formatter: (cell) => {
-            const v = num(cell.getValue());
-            if (v === null) return "";
-            const s = v.toFixed(2);
-            return v > 0 ? `+${s}` : s;
-          }
-        },
-
-        { title: "Shots", field: "shots", sorter: "number", hozAlign: "right" },
-
-        { title: "SoT", field: "sot", sorter: "number", hozAlign: "right" },
-
-        {
-          title: "Conv%",
-          field: "conv",
-          sorter: (a, b) => num(a) - num(b),
-          hozAlign: "right",
-          formatter: (cell) => {
-            const raw = String(cell.getValue() ?? "").trim();
-            if (!raw) return "";
-            // If already has %, keep; else format
-            if (raw.includes("%")) return raw;
-            const v = num(raw);
-            return v === null ? "" : `${v.toFixed(2)}%`;
-          }
-        },
-
-        {
-          title: "xG/Shot",
-          field: "xg_per_shot",
-          sorter: "number",
-          hozAlign: "right",
-          formatter: (cell) => {
-            const v = num(cell.getValue());
-            return v === null ? "" : v.toFixed(2);
-          }
-        },
-
-        {
-          title: "Shots/SoT",
-          field: "SOT_per_shot",
-          sorter: "number",
-          hozAlign: "right",
-          formatter: (cell) => {
-            const v = num(cell.getValue());
-            return v === null ? "" : v.toFixed(2);
-          }
-        }
-      ],
-    });
-
-    // Status pill
-    const statusEl = document.getElementById("status");
-    table.on("dataLoaded", function(data){
-      statusEl.textContent = `Loaded: ${data.length} teams`;
-    });
-    table.on("dataLoadError", function(){
-      statusEl.textContent = "Load failed (check CSV path)";
-    });
-
-    // Team filter
-    const filterInput = document.getElementById("teamFilter");
-    filterInput.addEventListener("input", (e) => {
-      const q = e.target.value.trim();
-      if (!q) table.clearFilter(true);
-      else table.setFilter("team", "like", q);
-    });
-  </script>
+  <!-- Your table logic -->
+  <script src="./tables.js"></script>
 </body>
 </html>
