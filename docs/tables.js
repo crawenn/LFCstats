@@ -1,4 +1,4 @@
-const CSV_URL = "../data/latest.csv";
+const CSV_URL = "./data/latest.csv";
 
 const statusEl = document.getElementById("status");
 const filterInput = document.getElementById("teamFilter");
