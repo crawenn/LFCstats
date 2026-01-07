@@ -1,7 +1,3 @@
-// Repo structure assumed:
-//   /data/latest.csv
-//   /docs/index.html
-// So from /docs, this is correct:
 const CSV_URL = "../data/latest.csv";
 
 const statusEl = document.getElementById("status");
@@ -43,7 +39,7 @@ function fmtDelta(cell, normalDecimals = 2, deltaDecimals = 2, {forceSignInDelta
 
   if (isDelta && forceSignInDelta) {
     if (n > 0) return `+${s}`;
-    return s; // negative already has -
+    return s;
   }
 
   return s;
@@ -130,13 +126,12 @@ if (typeof Tabulator === "undefined") throw new Error("Tabulator failed to load 
 if (typeof Papa === "undefined") throw new Error("PapaParse failed to load (CDN blocked?)");
 
 const table = new Tabulator("#table", {
-  height: "75vh",
+  //height: "75vh",
   layout: "fitColumns",
   responsiveLayout: "collapse",
   placeholder: "No data loaded.",
   initialSort: [{ column: "_sortKey", dir: "desc" }],
 
-  // ✅ rowFormatter belongs HERE (table options), not inside a column
   rowFormatter: function (row) {
     const d = row.getData();
     if (d._isAvg) {
