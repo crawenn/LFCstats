@@ -182,14 +182,35 @@ const table = new Tabulator("#table", {
   ],
 });
 
-filterInput.addEventListener("input", (e) => {
-  const q = e.target.value.trim();
-  if (!q) table.clearFilter(true);
-  else table.setFilter([
-    [{ field: "_isAvg", type: "=", value: true }],
-    [{ field: "team" , type: "like", value: q }]
-  ]);
+let currentQuery = "";
+
+filterInput.addEventListener("input", () => {
+  const q = filterInput.value.trim().toLowerCase();
+
+  if (!q) {
+    table.clearFilter();
+    return;
+  }
+
+  table.setFilter((data) => {
+    if (data._isAvg === true) return true;              // always keep League Average
+    const team = (data.team ?? "").toLowerCase();
+    return team.includes(q);
+  });
 });
+
+function applyFilter() {
+  if (!currentQuery) {
+    table.clearFilter();
+    return;
+  }
+
+  table.setFilter([
+    [{ field: "_isAvg", type: "=", value: true }],
+    [{ field: "team", type: "like", value: currentQuery }],
+  ]);
+}
+
 
 function renderTable() {
   const rowsWithAvg = [leagueAvg, ...baseRows];
