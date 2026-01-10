@@ -65,6 +65,26 @@ p{
   white-space: nowrap;
 }
 
+.btn{
+  border:1px solid var(--border);
+  padding:10px 12px;
+  border-radius:10px;
+  font-size: 12px;
+  color: var(--text);
+  background:#0f1420;
+  cursor:pointer;
+  white-space: nowrap;
+}
+
+.btn:hover{
+  filter: brightness(1.08);
+}
+
+.btn:active{
+  transform: translateY(1px);
+}
+
+
 #teamFilter{
   flex:1;
   min-width:220px;

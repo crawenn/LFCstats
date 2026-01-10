@@ -3,6 +3,7 @@ const CSV_URL = new URL("./data/latest.csv", window.location.href).toString();
 const statusEl = document.getElementById("status");
 const filterInput = document.getElementById("teamFilter");
 const deltaToggle = document.getElementById("deltaToggle");
+const reportBtn = document.getElementById("reportIssueBtn");
 
 let baseRows = [];
 let leagueAvg = null;
@@ -65,6 +66,45 @@ function computeLeagueAvg(rows) {
     _isAvg: true,
     _sortKey: 0
   };
+}
+
+function buildGitHubIssueUrl() {
+  const base = "https://github.com/crawenn/LFCstats/issues/new";
+
+  const title = encodeURIComponent("Issue: <describe briefly>");
+  const sorters = (typeof table !== "undefined" && table?.getSorters)
+    ? table.getSorters().map(s => `${s.field}:${s.dir}`).join(", ")
+    : "";
+
+  const body = encodeURIComponent(
+`### What happened?
+(Describe the problem)
+
+### What did you expect?
+(Describe expected behaviour)
+
+### Steps to reproduce
+1.
+2.
+3.
+
+### Context (auto-filled)
+- Page: ${window.location.href}
+- CSV: ${CSV_URL}
+- Delta mode: ${deltaToggle?.checked ? "on" : "off"}
+- Search: ${filterInput?.value ?? ""}
+- Sort: ${sorters || "(none)"}
+- Browser: ${navigator.userAgent}
+`
+  );
+
+  return `${base}?title=${title}&body=${body}`;
+}
+
+if (reportBtn) {
+  reportBtn.addEventListener("click", () => {
+    window.open(buildGitHubIssueUrl(), "_blank", "noopener,noreferrer");
+  });
 }
 
 function withDeltas(rows, avg) {
