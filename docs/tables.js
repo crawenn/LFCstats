@@ -213,11 +213,11 @@ const table = new Tabulator("#table", {
       formatter: (cell) => {
         const raw = String(cell.getValue() ?? "").trim();
         if (!raw) return "";
-        return raw.includes("%") ? raw : `${toNumberOrNull(raw)?.toFixed(2) ?? ""}%`;
+        return raw.includes("%") ? raw : `${toNumberOrNull(raw)?.toFixed(3) ?? ""}%`;
       }
     },
 
-    { title: "xG/Shot", field: "xg_per_shot", sorter: "number", hozAlign: "center", formatter: (cell) => fmtDelta(cell, 2) },
+    { title: "xG/Shot", field: "xg_per_shot", sorter: "number", hozAlign: "center", formatter: (cell) => fmtDelta(cell, 3) },
     { title: "Shots/SoT", field: "SOT_per_shot", sorter: "number", hozAlign: "center", formatter: (cell) => fmtDelta(cell, 2) },
   ],
 });
